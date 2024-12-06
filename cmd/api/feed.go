@@ -6,6 +6,21 @@ import (
 	"github.com/babaYaga451/social/internal/store"
 )
 
+// getUserFeedHandler godoc
+//
+//	@Summary		Fetches the user feed
+//	@Description	Fetches the user feed
+//	@Tags			feed
+//	@Accept			json
+//	@Produce		json
+//	@Param			limit	query		int		false	"Limit"
+//	@Param			offset	query		int		false	"Offset"
+//	@Param			sort	query		string	false	"Sort"
+//	@Success		200		{object}	[]store.PostWithMetaData
+//	@Failure		400		{object}	error
+//	@Failure		500		{object}	error
+//	@Security		ApiKeyAuth
+//	@Router			/users/feed [get]
 func (app *application) getUserFeedHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 

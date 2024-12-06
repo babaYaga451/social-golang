@@ -9,6 +9,15 @@ import (
 	"github.com/joho/godotenv"
 )
 
+//	@title			Go-Social
+//	@description	API for social platform to follow users and post content
+
+//	@BasePath					/v1
+//	@securityDefinitions.apiKey	ApiKeyAuth
+//	@in							header
+//	@name						Authorization
+//	@description
+
 func main() {
 
 	err := godotenv.Load()
@@ -17,7 +26,8 @@ func main() {
 	}
 
 	cfg := config{
-		addr: env.GetString("ADDR", ":8080"),
+		addr:   env.GetString("ADDR", ":8080"),
+		apiURL: env.GetString("EXTERNAL_URL", "localhost:8080"),
 		db: dbConfig{
 			addr:         env.GetString("DB_ADDR", "postgresql://postgres:password@localhost/postgres?sslmode=disable"),
 			maxOpenConns: env.GetInt("DB_MAX_OPEN_CONNS", 30),
