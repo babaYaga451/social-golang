@@ -7,6 +7,7 @@ import (
 	"github.com/babaYaga451/social/internal/env"
 	"github.com/babaYaga451/social/internal/store"
 	"github.com/joho/godotenv"
+	"go.uber.org/zap"
 )
 
 //	@title			Go-Social
@@ -36,6 +37,11 @@ func main() {
 		},
 	}
 
+	// Logger
+	logger := zap.Must(zap.NewProduction()).Sugar()
+	defer logger.Sync()
+
+	// Database
 	db, err := db.New(
 		cfg.db.addr,
 		cfg.db.maxOpenConns,
@@ -44,19 +50,20 @@ func main() {
 	)
 
 	if err != nil {
-		log.Panic(err)
+		logger.Fatal(err)
 	}
 
 	defer db.Close()
-	log.Println("Database connection pool established")
+	logger.Info("Database connection pool established")
 
 	store := store.NewStorage(db)
 
 	app := &application{
-		conf:  cfg,
-		store: store,
+		conf:   cfg,
+		store:  store,
+		logger: logger,
 	}
 
 	mux := app.mount()
-	log.Fatal(app.run(mux))
+	logger.Fatal(app.run(mux))
 }
