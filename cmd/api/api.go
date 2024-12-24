@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/babaYaga451/social/docs"
+	"github.com/babaYaga451/social/internal/mailer"
 	"github.com/babaYaga451/social/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -18,19 +19,32 @@ type application struct {
 	conf   config
 	store  store.Storage
 	logger *zap.SugaredLogger
+	mailer mailer.Client
 }
 
 type config struct {
-	addr   string
-	db     dbConfig
-	apiURL string
-	mail   mailConfig
+	addr        string
+	db          dbConfig
+	env         string
+	frontendURL string
+	apiURL      string
+	mail        mailConfig
 }
 
 type mailConfig struct {
-	exp time.Duration
+	exp       time.Duration
+	fromEmail string
+	sendGrid  sendGridConfig
+	mailTrap  mailTrapConfig
 }
 
+type sendGridConfig struct {
+	apiKey string
+}
+
+type mailTrapConfig struct {
+	apiKey string
+}
 type dbConfig struct {
 	addr         string
 	maxOpenConns int

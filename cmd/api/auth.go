@@ -3,8 +3,10 @@ package main
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"net/http"
 
+	"github.com/babaYaga451/social/internal/mailer"
 	"github.com/babaYaga451/social/internal/store"
 	"github.com/google/uuid"
 )
@@ -81,7 +83,31 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		Token: plainToken,
 	}
 
-	if err := app.jsonResponse(w, http.StatusCreated, userWithToken); err != nil {
+	activationURL := fmt.Sprintf("%s/confirm/%s", app.conf.frontendURL, plainToken)
+	isProdEnv := app.conf.env == "production"
+	vars := struct {
+		Username      string
+		ActivationURL string
+	}{
+		Username:      user.UserName,
+		ActivationURL: activationURL,
+	}
+
+	//TODO: Implement notification service to send mail
+	status, err := app.mailer.Send(mailer.UserWelcomeTemplate, user.UserName, user.Email, vars, !isProdEnv)
+	if err != nil {
+		app.logger.Errorf("error sending welcome email", "error", err)
+
+		if err := app.store.Users.Delete(ctx, user.ID); err != nil {
+			app.logger.Errorw("error deleting user", "error", err)
+		}
+		app.internalServerError(w, r, err)
+		return
+	}
+
+	app.logger.Infow("Email sent with status code%v", status)
+
+	if err := app.jsonResponse(w, status, userWithToken); err != nil {
 		app.internalServerError(w, r, err)
 	}
 }
