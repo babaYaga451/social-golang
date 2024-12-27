@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	ErrorNotFound = errors.New("Record not found")
+	ErrorNotFound = errors.New("record not found")
 	QueryTimeout  = time.Second * 5
 )
 
@@ -21,8 +21,9 @@ type Storage struct {
 		GetUserFeed(context.Context, int64, PaginatedFeedQuery) ([]PostWithMetaData, error)
 	}
 	Users interface {
-		Create(context.Context, *sql.Tx, *User) error
 		GetById(context.Context, int64) (*User, error)
+		GetByEmail(context.Context, string) (*User, error)
+		Create(context.Context, *sql.Tx, *User) error
 		CreateAndInvite(ctx context.Context, user *User, token string, exp time.Duration) error
 		Activate(context.Context, string) error
 		Delete(context.Context, int64) error
