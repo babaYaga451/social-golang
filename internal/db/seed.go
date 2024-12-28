@@ -94,6 +94,7 @@ func generateUsers(num int) []*store.User {
 		users[i] = &store.User{
 			UserName: faker.FirstName() + fmt.Sprintf("%d", i),
 			Email:    faker.Email(),
+			RoleID:   1,
 		}
 	}
 	return users

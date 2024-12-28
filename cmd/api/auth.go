@@ -52,6 +52,9 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	user := &store.User{
 		UserName: payload.UserName,
 		Email:    payload.Email,
+		Role: store.Role{
+			Name: "user",
+		},
 	}
 
 	// hash the password
@@ -85,7 +88,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		Token: plainToken,
 	}
 
-	activationURL := fmt.Sprintf("%s/confirm/%s", app.conf.frontendURL, plainToken)
+	activationURL := fmt.Sprintf("http://localhost%s/v1/users/activate/%s", app.conf.addr, plainToken)
 	isProdEnv := app.conf.env == "production"
 	vars := struct {
 		Username      string
