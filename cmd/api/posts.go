@@ -252,6 +252,6 @@ func (app *application) updatePost(ctx context.Context, post *store.Post) error 
 		return err
 	}
 
-	app.cacheStorage.User.Delete(ctx, post.User.ID)
+	app.cacheStorage.User.Delete(ctx, post.UserID)
 	return nil
 }
