@@ -9,7 +9,9 @@ import (
 	"github.com/babaYaga451/social/internal/env"
 	"github.com/babaYaga451/social/internal/mailer"
 	"github.com/babaYaga451/social/internal/store"
+	"github.com/babaYaga451/social/internal/store/cache"
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 )
 
@@ -39,6 +41,12 @@ func main() {
 			maxOpenConns: env.GetInt("DB_MAX_OPEN_CONNS", 30),
 			maxIdleConns: env.GetInt("DB_MAX_IDLE_CONNS", 30),
 			maxIdleTime:  env.GetString("DB_MAX_IDLE_TIME", "15m"),
+		},
+		redis: redisConfig{
+			addr:    env.GetString("REDIS_ADDR", "localhost:6379"),
+			pw:      env.GetString("REDIS_PASSWORD", ""),
+			db:      env.GetInt("REDIS_DB", 0),
+			enabled: env.GetBoolean("CACHE_ENABLED", false),
 		},
 		mail: mailConfig{
 			exp:       time.Hour * 24 * 3,
@@ -82,7 +90,15 @@ func main() {
 	defer db.Close()
 	logger.Info("Database connection pool established")
 
+	// Cache
+	var rdb *redis.Client
+	if cfg.redis.enabled {
+		rdb = cache.NewRedisClient(cfg.redis.addr, cfg.redis.pw, cfg.redis.db)
+		logger.Info("Redis cache connection established")
+	}
+
 	store := store.NewStorage(db)
+	cacheStorage := cache.NewRedisStore(rdb)
 
 	// mailer := mailer.NewSendgrid(cfg.mail.sendGrid.apiKey, cfg.mail.fromEmail)
 	mailTrap, err := mailer.NewMailTrapClient(cfg.mail.mailTrap.apiKey, cfg.mail.fromEmail)
@@ -95,6 +111,7 @@ func main() {
 	app := &application{
 		conf:           cfg,
 		store:          store,
+		cacheStorage:   cacheStorage,
 		logger:         logger,
 		mailer:         mailTrap,
 		authenticatort: jwtAuthenticator,

@@ -9,6 +9,7 @@ import (
 	"github.com/babaYaga451/social/internal/auth"
 	"github.com/babaYaga451/social/internal/mailer"
 	"github.com/babaYaga451/social/internal/store"
+	"github.com/babaYaga451/social/internal/store/cache"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"go.uber.org/zap"
@@ -19,6 +20,7 @@ import (
 type application struct {
 	conf           config
 	store          store.Storage
+	cacheStorage   cache.Storage
 	logger         *zap.SugaredLogger
 	mailer         mailer.Client
 	authenticatort auth.Authenticator
@@ -48,6 +50,14 @@ type config struct {
 	apiURL      string
 	mail        mailConfig
 	auth        authConfig
+	redis       redisConfig
+}
+
+type redisConfig struct {
+	addr    string
+	pw      string
+	db      int
+	enabled bool
 }
 
 type mailConfig struct {
